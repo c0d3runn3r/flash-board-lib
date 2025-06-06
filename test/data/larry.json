@@ -1,0 +1,78 @@
+{
+  "name": "Larry",
+  "connected": 1,
+  "connection_info": {
+    "connect_time": "2025-05-30T15:30:57.675Z",
+    "disconnect_time": null,
+    "uptime_ms": 4610248
+  },
+  "last_seen": {
+    "lat": 44.53903162264233,
+    "lon": -123.3708097052569,
+    "alt": 82.14149543005286,
+    "timestamp": "2025-05-30T16:46:57.792Z"
+  },
+  "version": {
+    "bodynode3": "1.2.0",
+    "headnode3": "1.3.1",
+    "necknode3": "1.1.1",
+    "powernode3": "1.5.1",
+    "sidewalknode3": "1.0.0",
+    "metavision": "4.6.0",
+    "daxos": "5.12.0",
+    "kernel": {
+      "release": "5.10.192-tegra",
+      "build": "fbfd057",
+      "type": "xavier"
+    }
+  },
+  "mqtt": {
+    "connected": true,
+    "version": "1.5.1",
+    "heartbeat": "1",
+    "rssi": "-52",
+    "soc": "90",
+    "safe": "0",
+    "runlevel": "run",
+    "interface": "auto",
+    "charging": "0",
+    "publish": "Example: get bots.<uuid>.mqtt.publish system/runlevel 1. Pushes that value to the bot's MQTT endpoint."
+  },
+  "mqtt_v2": {
+    "connected": true,
+    "version": {
+      "value": "1.5.1",
+      "updated": "2025-05-30T16:47:33.960Z"
+    },
+    "heartbeat": {
+      "value": "1",
+      "updated": "2025-05-30T16:47:35.883Z"
+    },
+    "rssi": {
+      "value": "-52",
+      "updated": "2025-05-30T16:47:37.882Z"
+    },
+    "soc": {
+      "value": "90",
+      "updated": "2025-05-30T16:47:39.801Z"
+    },
+    "safe": {
+      "value": "0",
+      "updated": "2025-05-30T16:47:41.800Z"
+    },
+    "runlevel": {
+      "value": "run",
+      "updated": "2025-05-30T16:47:43.807Z"
+    },
+    "interface": {
+      "value": "auto",
+      "updated": "2025-05-30T16:47:45.720Z"
+    },
+    "charging": {
+      "value": "0",
+      "updated": "2025-05-30T16:47:47.720Z"
+    },
+    "publish": "Usage: <topic> <value> : Push data to this bot's MQTT endpoints"
+  },
+  "datastore": {}
+}
