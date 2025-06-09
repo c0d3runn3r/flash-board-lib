@@ -26,8 +26,8 @@ describe('Element', () => {
 
   describe('.toString()', () => {
     it('should return correct string representation', () => {
-      const element = new Element({ asset_class_matcher: 'TestAsset' });
-      assert.strictEqual(String(element), 'Element{id=undefined for=TestAsset}');
+      const element = new Element({ asset_class_matcher: 'TestAsset', static: true });
+      assert.strictEqual(String(element), 'Element{static for=TestAsset asset=none}');
     });
   });
 
@@ -113,6 +113,30 @@ describe('Element', () => {
       });
       element.unpair();
     });  
+  });
+
+  describe('render', () => {
+
+	it('default text renderer', () => {
+	  const element = new Element({ asset_class_matcher: 'TestAsset' });
+	  assert.strictEqual(element.render(), 'Element{for=TestAsset asset=none}');
+
+	  const asset = new (class TestAsset extends Asset {})({ id: 'test_id' });
+      element.pair(asset);
+	  assert.strictEqual(element.render(), 'Element{for=TestAsset asset=TestAsset{id=test_id}}');
+
+
+	});
+
+	it('should throw an error for unknown format', () => {
+	  const element = new Element();
+	  assert.throws(() => {
+		element.render('unknown_format');
+	  }, {
+		name: 'Error',
+		message: "Unknown format 'unknown_format' for rendering element."
+	  });
+	});
   });
 
 });
