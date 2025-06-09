@@ -41,7 +41,7 @@ Removal is simpler, since it is just a process of calling `.remove_asset()` on t
 **Element rendering**
 As was stated earlier, Elements are opinionated views.  Elements express their view by overriding `.render(format)` and returning a render in the format requested.  Any format that is unsupported should `return super(format)` so the base class can return a default rendering.
 
-In order that we may use renders intelligently, a caching system is in place that relies on another override: `.summary()`.  An element summary is a string that uniquely identifies the state of a render.  For example, suppose you are rendering a car with a state for each door position (open or closed).  You might choose to return a `summary` of `cccc` if the doors were all closed, or `oocc` if the front ones are open.  The exact schema is up to you; what matters is that two identical summary strings always produce the same render.  If something happens that makes you think your render may have changed (for example, your car asset fires a `door_position_change` event) you will need to call `this.dirty()`.  This will cause the base Element to check `.summary`; if it has changed, a `summary_changed` event will be fired.
+In order that we may use renders intelligently, a caching system is in place that relies on another override: `.summary()`.  An element summary is a string that uniquely identifies the state of a render.  For example, suppose you are rendering a car with a state for each door position (open or closed).  You might choose to return a `summary` of `cccc` if the doors were all closed, or `oocc` if the front ones are open.  The exact schema is up to you; what matters is that two identical summary strings always produce the same render.  If something happens that makes you think your render may have changed (for example, your car asset fires a `door_position_change` event) you will need to call `this.dirty()`.  This will cause the base Element to check `.summary`; if it has changed, a `change` event will be fired.
 
 Making a custom Element therefore requires four things:
 1. Subclass Element, passing a custom asset class matcher to the base class constructor, e.g. `super({ asset_class_matcher: /car/i })`
@@ -64,7 +64,7 @@ Making a custom Element therefore requires four things:
 - [x] Segment should instantiate any static Elements on construction
 - [x] Segment should create elements as assets are added, using a map and the process described in these docs
 - [x] Update documentation about `element.summary` and caching
-- [ ] Update elements so they can render text representation of themselves
+- [x] Update elements so they can render text representation of themselves
 - [ ] Update segments so they can render json including element indices, name and summary
 - [ ] Update elements so they emit an 'changed' event when their summary changes
 - [ ] Update segments so they watch their elements and update 'changed' events no more than 1 per 5s, the event to include the indices and summaries for change elements
