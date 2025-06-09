@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const GeoSegment = require('../lib/GeoSegment');
 const Asset = require('../lib/Asset');
+const Element = require('../lib/Element');
 
 /**
  * Represents an Asset with a position notion, extending Asset.
@@ -26,6 +27,15 @@ class PositionedAsset extends Asset {
 }
 
 describe('GeoSegment', () => {
+
+  let boardMock;
+  class Board { element_factory(_,params) { return new Element(params); } }
+
+  beforeEach(() => {
+    boardMock = new Board();
+  });
+
+
   let boundaries;
   let oregon_hq_boundary;
   let cpd_boundary;
@@ -42,18 +52,18 @@ describe('GeoSegment', () => {
 
   describe('constructor', () => {
     it('should create GeoSegment with valid boundary', () => {
-      const segment = new GeoSegment({ name: 'Oregon HQ', boundary: oregon_hq_boundary });
+      const segment = new GeoSegment({ name: 'Oregon HQ', boundary: oregon_hq_boundary }, boardMock);
       assert.strictEqual(segment.name, 'Oregon HQ', 'Name set correctly');
       assert.strictEqual(segment.boundary, oregon_hq_boundary, 'Boundary set correctly');
     });
 
     it('should throw error for invalid boundary', () => {
       assert.throws(() => {
-        new GeoSegment({ name: 'Invalid', boundary: null });
+        new GeoSegment({ name: 'Invalid', boundary: null }, boardMock);
       }, /Boundary must be a valid GeoJSON object/, 'Null boundary throws error');
 
       assert.throws(() => {
-        new GeoSegment({ name: 'Invalid', boundary: {} });
+        new GeoSegment({ name: 'Invalid', boundary: {} }, boardMock);
       }, /Boundary must be a valid GeoJSON object/, 'Invalid boundary throws error');
     });
   });
@@ -66,8 +76,8 @@ describe('GeoSegment', () => {
 
     beforeEach(() => {
       // Create GeoSegments for Oregon HQ and CPD
-      oregon_hq_segment = new GeoSegment({ name: 'Oregon HQ', boundary: oregon_hq_boundary });
-      cpd_segment = new GeoSegment({ name: 'CPD', boundary: cpd_boundary });
+      oregon_hq_segment = new GeoSegment({ name: 'Oregon HQ', boundary: oregon_hq_boundary }, boardMock);
+      cpd_segment = new GeoSegment({ name: 'CPD', boundary: cpd_boundary }, boardMock);
 
       // Create assets with specified positions
       bracer = new PositionedAsset({
@@ -84,28 +94,28 @@ describe('GeoSegment', () => {
       const added = oregon_hq_segment.add_asset(bracer);
       assert.strictEqual(added, true, 'Bracer added to Oregon HQ');
       assert.strictEqual(oregon_hq_segment.assets.length, 1, 'One asset in Oregon HQ');
-      assert.strictEqual(oregon_hq_segment.find_by_id('bracer'), bracer, 'Bracer found in Oregon HQ');
+      assert.strictEqual(oregon_hq_segment.find_asset('bracer'), bracer, 'Bracer found in Oregon HQ');
     });
 
     it('should add bracer to CPD segment', () => {
       const added = cpd_segment.add_asset(bracer);
       assert.strictEqual(added, true, 'Bracer added to CPD');
       assert.strictEqual(cpd_segment.assets.length, 1, 'One asset in CPD');
-      assert.strictEqual(cpd_segment.find_by_id('bracer'), bracer, 'Bracer found in CPD');
+      assert.strictEqual(cpd_segment.find_asset('bracer'), bracer, 'Bracer found in CPD');
     });
 
     it('should add smokey to CPD segment', () => {
       const added = cpd_segment.add_asset(smokey);
       assert.strictEqual(added, true, 'Smokey added to CPD');
       assert.strictEqual(cpd_segment.assets.length, 1, 'One asset in CPD');
-      assert.strictEqual(cpd_segment.find_by_id('smokey'), smokey, 'Smokey found in CPD');
+      assert.strictEqual(cpd_segment.find_asset('smokey'), smokey, 'Smokey found in CPD');
     });
 
     it('should not add smokey to Oregon HQ segment', () => {
       const added = oregon_hq_segment.add_asset(smokey);
       assert.strictEqual(added, false, 'Smokey not added to Oregon HQ');
       assert.strictEqual(oregon_hq_segment.assets.length, 0, 'No assets in Oregon HQ');
-      assert.strictEqual(oregon_hq_segment.find_by_id('smokey'), null, 'Smokey not found in Oregon HQ');
+      assert.strictEqual(oregon_hq_segment.find_asset('smokey'), null, 'Smokey not found in Oregon HQ');
     });
 
     it('should not add asset with invalid position', () => {

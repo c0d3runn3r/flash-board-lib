@@ -1,0 +1,91 @@
+const assert = require('node:assert');
+const Element = require('../lib/Element.js');
+const Asset = require('../lib/Asset.js');
+
+describe('Element', () => {
+  describe('constructor', () => {
+    it('should create element with default properties', () => {
+      const element = new Element();
+      assert.strictEqual(element.static, false);
+      assert.deepStrictEqual(element.asset_class_matcher, /.+/);
+      assert.strictEqual(element.asset, null);
+    });
+
+    it('should create element with custom properties', () => {
+      const config = {
+        static: true,
+        asset_class_matcher: /^TestAsset$/
+      };
+      const element = new Element(config);
+      assert.strictEqual(element.static, true);
+      assert.deepStrictEqual(element.asset_class_matcher, /^TestAsset$/);
+      assert.strictEqual(element.asset, null);
+    });
+  });
+
+
+  describe('.toString()', () => {
+    it('should return correct string representation', () => {
+      const element = new Element({ asset_class_matcher: 'TestAsset' });
+      assert.strictEqual(String(element), 'Element{id=undefined for=TestAsset}');
+    });
+  });
+
+  describe('.pair()', () => {
+
+	it('should successfully pair with any asset by default', () => {
+      const element = new Element();
+      const asset = new (class TestAsset extends Asset {})({ id: 'test_id' });
+      const result = element.pair(asset);
+      assert.strictEqual(result, true);
+      assert.strictEqual(element.asset, asset);
+    });
+
+	it('should successfully pair with matching asset', () => {
+      const element = new Element({ asset_class_matcher: /^TestAsset$/ });
+      const asset = new (class TestAsset extends Asset {})({ id: 'test_id' });
+      const result = element.pair(asset);
+      assert.strictEqual(result, true);
+      assert.strictEqual(element.asset, asset);
+    });
+
+    it('should fail to pair with non-matching asset', () => {
+      const element = new Element({ asset_class_matcher: /^TestAsset$/ });
+      const asset = new (class OtherAsset extends Asset {})({ id: 'test_id' });
+      const result = element.pair(asset);
+      assert.strictEqual(result, false);
+      assert.strictEqual(element.asset, null);
+    });
+
+    it('should fail to pair when already paired', () => {
+      const element = new Element({ asset_class_matcher: /.+/ });
+      const asset_1 = new (class TestAsset extends Asset {})({ id: 'test_id_1' });
+      const asset_2 = new (class TestAsset extends Asset {})({ id: 'test_id_2' });
+      element.pair(asset_1);
+      const result = element.pair(asset_2);
+      assert.strictEqual(result, false);
+      assert.strictEqual(element.asset, asset_1);
+    });
+  });
+
+  describe('unpair', () => {
+    it('should unpair a paired asset', () => {
+      const element = new Element();
+      const asset = new (class TestAsset extends Asset {})({ id: 'test_id' });
+      element.pair(asset);
+      assert.strictEqual(element.asset, asset);
+      element.unpair(); 
+      assert.strictEqual(element.asset, null);
+    });
+
+    it('should throw an error when trying to unpair without a paired asset', () => {
+      const element = new Element();
+      assert.throws(() => {
+        element.unpair();
+      }, {
+        name: 'Error',
+        message: "No asset to unpair." 
+      });
+    });
+  });
+});
