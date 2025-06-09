@@ -66,6 +66,18 @@ describe('Element', () => {
       assert.strictEqual(result, false);
       assert.strictEqual(element.asset, asset_1);
     });
+    // Add this test inside the describe('.pair()') block
+    it('should emit paired event when pairing successfully', (done) => {
+      const element = new Element({ asset_class_matcher: /^TestAsset$/ });
+      const asset = new (class TestAsset extends Asset {})({ id: 'test_id' });
+      element.on('paired', (elem, pairedAsset) => {
+        assert.strictEqual(elem, element);
+        assert.strictEqual(pairedAsset, asset);
+        done();
+      });
+      element.pair(asset);
+    });
+
   });
 
   describe('unpair', () => {
@@ -87,5 +99,20 @@ describe('Element', () => {
         message: "No asset to unpair." 
       });
     });
+
+    // Add this test inside the describe('unpair') block
+    it('should emit unpaired event when unpairing successfully', (done) => {
+      const element = new Element();
+      const asset = new (class TestAsset extends Asset {})({ id: 'test_id' });
+      element.pair(asset);
+      element.on('unpaired', (elem, unpairedAsset) => {
+        assert.strictEqual(elem, element);
+        assert.strictEqual(unpairedAsset, asset);
+        assert.strictEqual(element.asset, null);
+        done();
+      });
+      element.unpair();
+    });  
   });
+
 });
