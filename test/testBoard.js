@@ -3,10 +3,110 @@ const Board = require('../lib/Board');
 const Asset = require('../lib/Asset');
 const Segment = require('../lib/Segment');
 const GeoSegment = require('../lib/GeoSegment');
+const Element = require('../lib/Element');
 const fs = require('fs');
 const path = require('path');
 
 describe('Board', () => {
+describe('Element factory', () => {
+    let board, segment, asset;
+
+    beforeEach(() => {
+      board = new Board();
+      segment = new Segment({ name: 'Test Segment' }, board);
+      board.add_segment(segment);
+      asset = new Asset({ id: 'test-asset', name: 'Test Asset' });
+    });
+
+    it('should create a default Element with string target', () => {
+      const element = board.element_factory('Element', { id: 'test-element' });
+      assert.ok(element instanceof Element, 'Element instance created');
+      assert.ok(element.pair(asset, true), 'Element can pair with asset');
+    });
+
+    it('should create an Element for an Asset', () => {
+      const element = board.element_factory(asset, { id: 'test-element' });
+      assert.ok(element instanceof Element, 'Element instance created for asset');
+      assert.ok(element.pair(asset, true), 'Element can pair with provided asset');
+    });
+
+    it('should use asset-to-element mapping from config', () => {
+      const config = {
+        asset_to_element: [{ asset: 'Asset', element: 'Element' }]
+      };
+      const customBoard = new Board(config);
+      const element = customBoard.element_factory(asset, { id: 'test-element' });
+      assert.ok(element instanceof Element, 'Element instance created using mapping');
+      assert.ok(element.pair(asset, true), 'Element can pair with asset');
+    });
+
+    it('should throw error for invalid class name', () => {
+      assert.throws(() => {
+        board.element_factory('NonExistentClass');
+      }, /Unable to find class 'NonExistentClass'/, 'Invalid class name throws error');
+    });
+
+    it('should throw error for invalid target type', () => {
+      assert.throws(() => {
+        board.element_factory(123);
+      }, /Target must be an Asset instance or a string representing the element class name/, 'Invalid target type throws error');
+    });
+
+    it('should throw error if element cannot pair with asset', () => {
+      // Mock a custom Element class that rejects pairing
+      class CustomElement extends Element {
+        pair(asset, testMode) {
+          return false;
+        }
+      }
+      const config = {
+        asset_to_element: [{ asset: 'Asset', element: 'CustomElement' }]
+      };
+      const customBoard = new Board(config, { CustomElement });
+      assert.throws(() => {
+        customBoard.element_factory(asset);
+      }, /Element class 'CustomElement' is not configured to accept asset of type 'Asset'/, 'Non-pairing element throws error');
+    });
+  });
+
+  describe('Asset-to-element mapping', () => {
+    it('should correctly process valid asset-to-element mappings', () => {
+      const config = {
+        asset_to_element: [
+          { asset: 'Asset', element: 'Element' },
+          { asset: 'CustomAsset', element: 'CustomElement' }
+        ]
+      };
+      const board = new Board(config);
+      const asset = new Asset({ id: 'test-asset', name: 'Test Asset' });
+      const element = board.element_factory(asset);
+      assert.ok(element instanceof Element, 'Element created using mapping');
+      assert.ok(element.pair(asset, true), 'Element can pair with asset');
+    });
+
+    it('should throw error for invalid asset-to-element mappings', () => {
+      const invalidConfig = {
+        asset_to_element: [
+          { asset: 123, element: 'Element' }, // Invalid asset type
+          { asset: 'Asset', element: 456 }   // Invalid element type
+        ]
+      };
+      assert.throws(() => {
+        new Board(invalidConfig);
+      }, /Asset to element mapping must be an array of objects with 'asset' and 'element' properties as strings/, 'Invalid mapping throws error');
+    });
+
+    it('should handle empty asset-to-element mappings', () => {
+      const config = {
+        asset_to_element: []
+      };
+      const board = new Board(config);
+      const asset = new Asset({ id: 'test-asset', name: 'Test Asset' });
+      const element = board.element_factory(asset);
+      assert.ok(element instanceof Element, 'Default Element created with empty mapping');
+      assert.ok(element.pair(asset, true), 'Element can pair with asset');
+    });
+  });
 
   describe('Asset management', () => {
     let board;
