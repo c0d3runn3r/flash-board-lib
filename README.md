@@ -45,7 +45,7 @@ In order that we may use renders intelligently, a caching system is in place tha
 
 Making a custom Element therefore requires four things:
 1. Subclass Element, passing a custom asset class matcher to the base class constructor, e.g. `super({ asset_class_matcher: /car/i })`
-2. Override .render() to produce at least one render type (probably `text` and `svg` at a minimum)
+2. Override .render() to produce at least one render type (probably `text` or `svg` at a minimum). **call super()** for unsupported types
 3. Override `get .summary()` to return a consistent code representing render states for caching
 4. Listen to any important events in your asset (you can attach/detach asset event listeners when the Element emits `pair` and `unpair` events) and call `.dirty()` if you think your render might have changed
 
@@ -65,8 +65,8 @@ Making a custom Element therefore requires four things:
 - [x] Segment should create elements as assets are added, using a map and the process described in these docs
 - [x] Update documentation about `element.summary` and caching
 - [x] Update elements so they can render text representation of themselves
-- [ ] Update segments so they can render json including element indices, name and summary
-- [ ] Update elements so they emit an 'changed' event when their summary changes
+- [x] Update segments so they can render json including element indices, name and summary
+- [x] Update elements so they emit an 'change' event when their summary changes
 - [ ] Update segments so they watch their elements and update 'changed' events no more than 1 per 5s, the event to include the indices and summaries for change elements
 - [ ] Enhance Board with a router that exposes segments, showing an array of segments and a JSON render of those segments
 - [ ] Make a webapp that displays all segments, using text representations of the elements

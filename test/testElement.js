@@ -127,7 +127,31 @@ describe('Element', () => {
 			
 			
 		});
-		
+
+		it('object renderer', () => {
+			const element = new Element({ asset_class_matcher: 'TestAsset', static: true });
+			const asset = new (class TestAsset extends Asset {})({ id: 'test_id' });
+			
+			// Test without asset
+			assert.deepStrictEqual(element.render('object'), {
+				type: 'Element',
+				static: true,
+				asset_type: 'TestAsset',
+				summary: 'Element{static for=TestAsset asset=none}',
+				asset: ''
+			});
+			
+			// Test with asset
+			element.pair(asset);
+			assert.deepStrictEqual(element.render('object'), {
+				type: 'Element',
+				static: true,
+				asset_type: 'TestAsset',
+				summary: 'Element{static for=TestAsset asset=TestAsset{id=test_id}}',
+				asset: 'TestAsset{id=test_id}'
+			});
+		});		
+
 		it('should throw an error for unknown format', () => {
 			const element = new Element();
 			assert.throws(() => {
