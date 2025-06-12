@@ -190,12 +190,26 @@ describe('Segment', () => {
 				assert.strictEqual(event.segment, segment);
 				assert.strictEqual(event.element, segment.elements[0]);
 				assert.strictEqual(event.summary, segment.elements[0].summary);
-				assert.strictEqual(event.index, 0);
+				assert.strictEqual(event.element_index, 0);
 				done();
 			});
 			const asset = new Asset({ id: 'test_id' }); // Adding an asset will create an element
 			segment.add_asset(asset);
 		});
+
+		it('should include the proper element index in the "change" event', (done) => {
+
+			const segment = new Segment({}, boardMock);
+			const asset1 = new Asset({ id: 'test_id' });
+			segment.add_asset(asset1);
+			segment.on('change', (event) => {
+				assert.strictEqual(event.element_index, 1);
+				done();
+			});
+			const asset2 = new Asset({ id: 'test_id2' });
+			segment.add_asset(asset2); 
+		}
+		);
 
 		it('should emit "change" event when an element is removed', (done) => {
 			const segment = new Segment({}, boardMock);
@@ -206,7 +220,7 @@ describe('Segment', () => {
 				// First change event is from when the asset is removed
 				assert.strictEqual(event.segment, segment);
 				assert.strictEqual(event.element, related_element);
-				assert.strictEqual(event.index, 0);
+				assert.strictEqual(event.element_index, 0);
 
 				segment.once('change', (event) => {
 
@@ -214,7 +228,7 @@ describe('Segment', () => {
 					assert.strictEqual(event.segment, segment);
 					assert.strictEqual(event.element, null);
 					assert.strictEqual(event.summary, '');
-					assert.strictEqual(event.index, 0);
+					assert.strictEqual(event.element_index, 0);
 					done();
 				});
 
@@ -234,7 +248,7 @@ describe('Segment', () => {
 				assert.strictEqual(event.segment, segment);
 				assert.strictEqual(event.element, segment.elements[0]);
 				assert.strictEqual(event.summary, segment.elements[0].summary);
-				assert.strictEqual(event.index, 0);
+				assert.strictEqual(event.element_index, 0);
 				done();
 			});
 			segment.remove_asset('test_id'); // This will unpair the asset and trigger a change event (element is static so it remains)

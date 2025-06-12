@@ -81,7 +81,7 @@ Elements are identified by array index in notifications.  A ramification of this
 - [x] Update elements so they emit an 'change' event when their summary changes
 - [x] Update segments so they watch their elements and update 'changed' events with indices
 - [x] Update segments to include a checksum
-- [ ] Update board to watch segment change events and emit Board.change no more than 1 per 5s, the event to include the indices and summaries for change elements, plus new checksum
+- [x] Update board to watch segment change events and emit Board.change no more than 1 per 5s, the event to include the indices and summaries for change elements, plus new checksum
 - [ ] Enhance Board with a router that exposes segments, showing an array of segments and a JSON render of those segments
 - [ ] Make a webapp that displays all segments, using text representations of the elements
 - [ ] Update server to serve webapp
