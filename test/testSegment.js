@@ -181,15 +181,6 @@ describe('Segment', () => {
 		});
 	});
 
-/**
- * @event change
- * @description Emitted when an element's render changes
- * @param {Object} data - The data associated with the change event.
- * @param {Segment} data.segment - The segment that changed.
- * @param {Element} data.element - The element that changed, or null if the element was removed
- * @param {string} data.summary - A summary of the element's current state (from the element's .summary property)
- * @param {number} data.index - The index of the element that changed, or -1 if the change was not related to a specific element.
- */
 
 	describe('events', () => {
 
@@ -246,9 +237,50 @@ describe('Segment', () => {
 				assert.strictEqual(event.index, 0);
 				done();
 			});
-			console.log('About to remove_assert');
 			segment.remove_asset('test_id'); // This will unpair the asset and trigger a change event (element is static so it remains)
 
+		});
+
+	});
+
+	describe('checksum',() => {
+
+		it('should return a nonzero checksum of a segment with assets', () => {
+			const segment = new Segment({ name: 'TestSegment' }, boardMock);
+			const asset1 = new Asset({ id: 'test_id1' });
+			const asset2 = new Asset({ id: 'test_id2' });
+			segment.add_asset(asset1);
+			segment.add_asset(asset2);
+			const checksum = segment.checksum;
+			assert.notStrictEqual(checksum, 0);
+		});
+
+		it('checksum should change when assets are added or removed', () => {
+			const segment = new Segment({ name: 'TestSegment' }, boardMock);
+			const asset1 = new Asset({ id: 'test_id1' });
+			const asset2 = new Asset({ id: 'test_id2' });
+			segment.add_asset(asset1);
+			const initialChecksum = segment.checksum;
+			segment.add_asset(asset2);
+			assert.notStrictEqual(segment.checksum, initialChecksum);
+			segment.remove_asset('test_id1');
+			assert.notStrictEqual(segment.checksum, initialChecksum);
+		});
+
+		it('should not return the same checksum initially vs after adding and then removing all assets', () => {
+
+			const segment = new Segment({ name: 'TestSegment' }, boardMock);
+			const initialChecksum = segment.checksum;
+
+			const asset1 = new Asset({ id: 'test_id1' });
+			const asset2 = new Asset({ id: 'test_id2' });
+			segment.add_asset(asset1);
+			segment.add_asset(asset2);
+			segment.remove_asset('test_id1');
+			segment.remove_asset('test_id2');
+
+			const secondChecksum = segment.checksum;
+			assert.notStrictEqual(initialChecksum, secondChecksum); // Since the elements will be [null, null] instead of []
 		});
 
 	});
