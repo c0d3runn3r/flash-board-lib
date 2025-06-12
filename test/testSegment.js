@@ -130,7 +130,7 @@ describe('Segment', () => {
 			const result = segment.remove_asset('test_id');
 			assert.strictEqual(result, true);
 			assert.deepStrictEqual(segment.assets, []);
-			assert.deepStrictEqual(segment.elements, []); // Non-static element pruned
+			assert.deepStrictEqual(segment.elements, [null]); // Non-static element pruned
 		});
 	});
 	
@@ -179,6 +179,78 @@ describe('Segment', () => {
 				message: "Unknown format 'unknown_format' for rendering segment."
 			});
 		});
+	});
+
+/**
+ * @event change
+ * @description Emitted when an element's render changes
+ * @param {Object} data - The data associated with the change event.
+ * @param {Segment} data.segment - The segment that changed.
+ * @param {Element} data.element - The element that changed, or null if the element was removed
+ * @param {string} data.summary - A summary of the element's current state (from the element's .summary property)
+ * @param {number} data.index - The index of the element that changed, or -1 if the change was not related to a specific element.
+ */
+
+	describe('events', () => {
+
+		it('should emit "change" event when an element is added', (done) => {
+			const segment = new Segment({}, boardMock);
+			segment.on('change', (event) => {
+				assert.strictEqual(event.segment, segment);
+				assert.strictEqual(event.element, segment.elements[0]);
+				assert.strictEqual(event.summary, segment.elements[0].summary);
+				assert.strictEqual(event.index, 0);
+				done();
+			});
+			const asset = new Asset({ id: 'test_id' }); // Adding an asset will create an element
+			segment.add_asset(asset);
+		});
+
+		it('should emit "change" event when an element is removed', (done) => {
+			const segment = new Segment({}, boardMock);
+			const asset = new Asset({ id: 'test_id' });
+			segment.add_asset(asset);
+			const related_element = segment.elements[0];
+			segment.once('change', (event) => {
+				// First change event is from when the asset is removed
+				assert.strictEqual(event.segment, segment);
+				assert.strictEqual(event.element, related_element);
+				assert.strictEqual(event.index, 0);
+
+				segment.once('change', (event) => {
+
+					// Second change event is from when the element is pruned
+					assert.strictEqual(event.segment, segment);
+					assert.strictEqual(event.element, null);
+					assert.strictEqual(event.summary, '');
+					assert.strictEqual(event.index, 0);
+					done();
+				});
+
+			});
+			segment.remove_asset('test_id');	// Remove the asset, which should prune the non-static element and trigger a change event
+		});
+
+		it('should emit "change" event when an element is modified', (done) => {
+			const config = {
+				name: 'TestSegment',
+				elements: [{ class: 'Element', static: true }]
+			};			
+			const segment = new Segment(config, boardMock);
+			const asset = new Asset({ id: 'test_id' });
+			segment.add_asset(asset);
+			segment.on('change', (event) => {
+				assert.strictEqual(event.segment, segment);
+				assert.strictEqual(event.element, segment.elements[0]);
+				assert.strictEqual(event.summary, segment.elements[0].summary);
+				assert.strictEqual(event.index, 0);
+				done();
+			});
+			console.log('About to remove_assert');
+			segment.remove_asset('test_id'); // This will unpair the asset and trigger a change event (element is static so it remains)
+
+		});
+
 	});
 	
 });

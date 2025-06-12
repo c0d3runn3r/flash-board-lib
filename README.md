@@ -41,13 +41,25 @@ Removal is simpler, since it is just a process of calling `.remove_asset()` on t
 **Element rendering**
 As was stated earlier, Elements are opinionated views.  Elements express their view by overriding `.render(format)` and returning a render in the format requested.  Any format that is unsupported should `return super(format)` so the base class can return a default rendering.
 
-In order that we may use renders intelligently, a caching system is in place that relies on another override: `.summary()`.  An element summary is a string that uniquely identifies the state of a render.  For example, suppose you are rendering a car with a state for each door position (open or closed).  You might choose to return a `summary` of `cccc` if the doors were all closed, or `oocc` if the front ones are open.  The exact schema is up to you; what matters is that two identical summary strings always produce the same render.  If something happens that makes you think your render may have changed (for example, your car asset fires a `door_position_change` event) you will need to call `this.dirty()`.  This will cause the base Element to check `.summary`; if it has changed, a `change` event will be fired.
+Change detection relies on `.summary()`, which you will need to override.  A summary is a string that uniquely identifies the state of an element's render.  For example, suppose you are rendering a car with a state for each door position (open or closed).  You might choose to return a `summary` of `cccc` if the doors were all closed, or `oocc` if the front ones are open.  The exact schema is up to you; what matters is that two identical summary strings do not require a visual update.  If something happens that makes you think your render may have changed (for example, your car asset fires a `door_position_change` event) you will need to call `this.dirty()`.  This will cause the base Element to check `.summary`; if it has changed, a `change` event will be fired.  
+
+> **Always summarize:** Elements render opinionated summaries!  It is an antipattern to include fine details that require constant distracting updates.  For example, a battery voltage should not be rendered as "54.45v" because this value will change constantly, causing distracting and inefficient element updates.  Instead try "good" and "bad" voltage, or better yet a battery-style voltage bar that shows 5v increments that are colored red and green.  Even if you don't care about thrashing the server, you should care about minimizing motion on the board in order to maximize communication value.
 
 Making a custom Element therefore requires four things:
 1. Subclass Element, passing a custom asset class matcher to the base class constructor, e.g. `super({ asset_class_matcher: /car/i })`
 2. Override .render() to produce at least one render type (probably `text` or `svg` at a minimum). **call super()** for unsupported types
 3. Override `get .summary()` to return a consistent code representing render states for caching
 4. Listen to any important events in your asset (you can attach/detach asset event listeners when the Element emits `pair` and `unpair` events) and call `.dirty()` if you think your render might have changed
+
+**Update events and client considerations**
+Segments provide a `.checksum` which can be used by clients to see if anything has gotten out of sync since their last update.  Real-time updates work as follows:
+- Segments listen to `Element.change` events and emit their own `Segment.change` event which includes the index of the changed Element
+- Board tracks all these changed element indices; every `n` (default 5) seconds it will emit `Board.change` that includes, for each Segment, an array of changed indices and also the Segment checksum
+- It is expected that the server listen to `Board.change` and emit e.g. Websocket traffic to alert clients to changes
+- Clients should update elements on change events, and they should also cache .summary codes for all Elements and compute their own checksum.  If things get too far out of sync, the checksums won't match (even after updating all elements) and the client should reload the whole segment.  This may happen e.g. after a server restart, when array inices are likely to change.
+
+Elements are identified by array index in notifications.  A ramification of this is that removed elements will result in `null` values in the array.  This prevents the entire array rearranging every time an element is added or removed.  The segment will re-fill nulls with new elements as they are added, so practically speaking the array will grow to a high water mark and then stop growing.  The alternative would probably involve assigning each element a unique ID.  I don't want to this.  I'm not prepared to vigorously defend this design choice right now other than to say that I don't want to build an ordering scheme right now and I want all boards to present in a consistent order.
+
 
 
 ## TO-DO
@@ -67,7 +79,9 @@ Making a custom Element therefore requires four things:
 - [x] Update elements so they can render text representation of themselves
 - [x] Update segments so they can render json including element indices, name and summary
 - [x] Update elements so they emit an 'change' event when their summary changes
-- [ ] Update segments so they watch their elements and update 'changed' events no more than 1 per 5s, the event to include the indices and summaries for change elements
+- [x] Update segments so they watch their elements and update 'changed' events with indices
+- [ ] Update segments to include a checksum
+- [ ] Update board to watch segment change events and emit Board.change no more than 1 per 5s, the event to include the indices and summaries for change elements, plus new checksum
 - [ ] Enhance Board with a router that exposes segments, showing an array of segments and a JSON render of those segments
 - [ ] Make a webapp that displays all segments, using text representations of the elements
 - [ ] Update server to serve webapp
