@@ -80,20 +80,8 @@ describe('Segment', () => {
 			assert.throws(() => {
 				segment.add_asset(new Asset({ id: 'test_id' }));
 			}, /Asset with ID test_id already exists/);
-		});
-		
-		it('should add asset and pair with element based on assets_to_elements', () => {
-			const segment = new Segment({
-				assets_to_elements: { TestAsset: Element }
-			}, boardMock);
-			const TestAsset = class TestAsset extends Asset {};
-			const asset = new TestAsset({ id: 'test_id' });
-			const result = segment.add_asset(asset);
-			assert.strictEqual(result, true);
-			assert.strictEqual(segment.assets.length, 1);
-			assert.strictEqual(segment.elements.length, 1);
-			assert.strictEqual(segment.elements[0].asset, asset);
-		});
+		});		
+
 	});
 	
 	describe('remove_asset', () => {
@@ -120,9 +108,7 @@ describe('Segment', () => {
 		});
 		
 		it('should unpair asset from element and prune non-static elements', () => {
-			const segment = new Segment({
-				assets_to_elements: { TestAsset: Element }
-			}, boardMock);
+			const segment = new Segment({}, boardMock);
 			const TestAsset = class TestAsset extends Asset {};
 			const asset = new TestAsset({ id: 'test_id' });
 			segment.add_asset(asset);

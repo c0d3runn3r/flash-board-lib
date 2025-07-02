@@ -8,20 +8,23 @@ const fs = require('fs');
 const path = require('path');
 
 describe('Board', () => {
+
 	describe('Element factory', () => {
 		let board, segment, asset;
+		class CustomElement extends Element {}
+		class CustomAsset extends Asset {}
 		
 		beforeEach(() => {
-			board = new Board();
+			board = new Board({ asset_to_element:[{ "asset": "CustomAsset", "element": "CustomElement"}]}, { CustomElement, CustomAsset });
 			segment = new Segment({ name: 'Test Segment' }, board);
 			board._add_segment(segment); // Calls private method to add segment
 			asset = new Asset({ id: 'test-asset', name: 'Test Asset' });
 		});
 		
-		it('should create a default Element with string target', () => {
-			const element = board.element_factory('Element', { id: 'test-element' });
-			assert.ok(element instanceof Element, 'Element instance created');
-			assert.ok(element.pair(asset, true), 'Element can pair with asset');
+		it('should create an object with string target', () => {
+
+			const element = board.element_factory('CustomElement', { id: 'test-element', asset_class_matcher: 'CustomAsset' });
+			assert.ok(element instanceof CustomElement, 'CustomElement instance created');
 		});
 		
 		it('should create an Element for an Asset', () => {
@@ -38,6 +41,16 @@ describe('Board', () => {
 			const element = customBoard.element_factory(asset, { id: 'test-element' });
 			assert.ok(element instanceof Element, 'Element instance created using mapping');
 			assert.ok(element.pair(asset, true), 'Element can pair with asset');
+		});
+
+		it('should throw an error if a non-array is passed for asset_to_element', () => {
+			const invalidConfig = {
+				asset_to_element: 'not-an-array'
+			};
+			assert.throws(() => {
+				new Board(invalidConfig);
+			}
+			, /Asset to element mapping must be an array of objects with 'asset' and 'element' properties as strings/, 'Invalid asset_to_element config throws error');
 		});
 		
 		it('should throw error for invalid class name', () => {
