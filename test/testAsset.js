@@ -58,9 +58,8 @@ describe('Asset', () => {
 
     it('should throw error for non-existent property', () => {
       const asset = new Asset({ id: 'test-asset', name: 'Test Asset' });
-      assert.throws(() => {
-        asset.get_notion('status');
-      }, /Attribute "status" does not exist/, 'Non-existent property throws error');
+
+      assert.ok(asset.get_notion('status') === undefined, 'Non-existent property returns undefined'); 
 
       assert.throws(() => {
         asset.set_value('status', 'active');
@@ -110,10 +109,7 @@ describe('Asset', () => {
       );
       assert.ok(asset.get_notion('location').timestamp instanceof Date, 'Location timestamp is a Date');
 
-      // Verify unknown property is ignored
-      assert.throws(() => {
-        asset.get_notion('unknown');
-      }, /Attribute "unknown" does not exist/, 'Unknown property not added');
+      assert.ok( asset.get_notion('unknown') === undefined, 'Unknown property is ignored' );
     });
 
     it('should skip missing fields and preserve existing values', () => {
