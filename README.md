@@ -20,7 +20,7 @@ Red - Unhandled problems exist
 
 ## Board internals
 
-`Board`, `Segment`, `Element`, and `Asset` are all classes.  Since an Element is an opinionated view, it must be subclassed to have any particular usefulness.  All Assets are owned by their Segment, and segments are owned by the Board.  It is the Segment's job to decide whether it needs to create an Element or not.  This is done by passing an Asset → Element map to the Segment's constructor.
+`Board`, `Segment`, `Element`, and `Asset` are all classes.  Since an Element is an opinionated view, it must be subclassed to have any particular usefulness.  All Assets are owned by their Segment, and segments are owned by the Board.  It is the Segment's job to decide whether it needs to create an Element or not.  This is informed by passing an Asset → Element map to the Segment's constructor.
 
 > **Board is a singleton** I struggled with whether or not to allow multiple Boards, since various departments may want disparate views on the same data; but since all that data would need to be held in common somewhere at the top level (e.g. a BoardManager or something), that would mean Boards would become rather simple groupings of Segments.  I think I can achieve that aim in some other way if it comes up (e.g. creating a view on a board) without the extra complexity in creating a BoardManager.  
 
@@ -39,17 +39,22 @@ Once you are up and running, those elements come to life (and additional Element
 Removal is simpler, since it is just a process of calling `.remove_asset()` on the containing segment, which in turn calls `.unpair()` on the associated elements; the element is then pruned (unless it is `.static`). 
 
 **Element rendering**
-As was stated earlier, Elements are opinionated views.  Elements express their view by overriding `.render(format)` and returning a render in the format requested.  Any format that is unsupported should `return super(format)` so the base class can return a default rendering.
+As was stated earlier, Elements are opinionated views.  Elements express their view in two ways:
 
-Change detection relies on `.summary()`, which you will need to override.  A summary is a string that uniquely identifies the state of an element's render.  For example, suppose you are rendering a car with a state for each door position (open or closed).  You might choose to return a `summary` of `cccc` if the doors were all closed, or `oocc` if the front ones are open.  The exact schema is up to you; what matters is that two identical summary strings do not require a visual update.  If something happens that makes you think your render may have changed (for example, your car asset fires a `door_position_change` event) you will need to call `this.dirty()`.  This will cause the base Element to check `.summary`; if it has changed, a `change` event will be fired.  
+1. by overriding `get .condition` to return an `ElementCondition` object.  This expresses a simple high level opinion (Green/Red etc) that can be used to summarize the whole Segment or Board
+2. by overriding `.render(format)` and returning a somewhat more detailed render in the format requested, e.g. `svg`.  Any format that is unsupported should `return super(format)` so the base class can return a default `text` rendering.
+
+Change detection relies on `element.summary()`, which you will need to override.  A summary is a string that uniquely identifies the state of an element's render and condition.  For example, suppose you are rendering a car with a state for each door position (open or closed).  You might choose to return a `summary` of `cccc` if the doors were all closed, or `oocc` if the front ones are open.  The exact schema is up to you; what matters is that two identical summary strings do not require a visual update.  If something happens that makes you think your render may have changed (for example, your car asset fires a `door_position_change` event) you will need to call `this.dirty()` on the element.  This will cause the `.summary` to be checked and a `.change` event to potentially fire.
 
 > **Always summarize:** Elements render opinionated summaries!  It is an antipattern to include too-fine details.  For example, a battery voltage should not be rendered as "54.45v" because this value will change constantly, causing distracting and inefficient element updates.  Instead try "good" and "bad" voltage, or better yet a battery-style voltage bar that shows 5v increments that are colored red and green.  Even if you don't care about thrashing the server, you should care about minimizing motion on the board in order to maximize communication value.
 
 Making a custom Element therefore requires four things:
 1. Subclass Element, passing a custom asset class matcher to the base class constructor, e.g. `super({...obj, asset_class_matcher: /car/i })`
-2. Override .render() to produce at least one render type (probably `text` or `svg` at a minimum). **call super()** for unsupported types
-3. Override `get .summary()` to return a consistent code representing render states for caching
-4. Listen to any important events in your asset (you can attach/detach asset event listeners when the Element emits `pair` and `unpair` events) and call `.dirty()` if you think your render might have changed.  `pair()` and `unpair()` will automatically call `dirty()` in the superclass, though this will have no effect if your `.summary` implementation doesn't use anything from the asset :)
+2. Provide one or more opinions
+	- To enable simple summaries, override `get condition()`
+	- to enable more details, override `.render()` and produce at least one render type (probably `text` or `svg` at a minimum). **call super()** for unsupported types.  	
+3. Override `get .summary()` to return a consistent code representing render states and condition for caching
+3. Listen to any important events in your asset (you can attach/detach asset event listeners when the Element emits `pair` and `unpair` events) and call `.dirty()` if you think your render or condition might have changed.  `pair()` and `unpair()` will automatically call `dirty()` in the superclass, though this will have no effect if your `.summary` implementation doesn't use anything from the asset `:)`
 
 **Update events and client considerations**
 Segments provide a `.checksum` which can be used by clients to see if anything has gotten out of sync since their last update.  Real-time updates work as follows:
@@ -82,7 +87,7 @@ Elements are identified by array index in notifications.  A ramification of this
 - [x] Update segments so they watch their elements and update 'changed' events with indices
 - [x] Update segments to include a checksum
 - [x] Update board to watch segment change events and emit Board.change no more than 1 per 5s, the event to include the indices and summaries for change elements, plus new checksum
-- [ ] Enhance Board with a router that exposes segments, showing an array of segments and a JSON render of those segments
+- [x] Enhance Board with a router that exposes segments, showing an array of segments and a JSON render of those segments
 - [ ] Make a webapp that displays all segments, using text representations of the elements
 - [ ] Update server to serve webapp
 - [ ] Finish Bot element graphics
