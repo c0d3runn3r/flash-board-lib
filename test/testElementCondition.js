@@ -2,13 +2,13 @@ const assert = require('node:assert');
 const ElementCondition = require('../lib/ElementCondition.js');
 
 describe('ElementCondition', () => {
-	describe('constructor', () => {
-		it('should create element with default properties', () => {
-			const elementCondition = new ElementCondition();
-			assert.strictEqual(elementCondition.condition, 'green');
-			assert.strictEqual(elementCondition.trend, 'unknown');
-		});
-	});
+    describe('constructor', () => {
+        it('should create element with default properties', () => {
+            const elementCondition = new ElementCondition();
+            assert.strictEqual(elementCondition.condition, 'green');
+            assert.strictEqual(elementCondition.trend, 'unknown');
+        });
+    });
 
     describe('.condition', () => {
         it('should return the current condition', () => {
@@ -45,4 +45,35 @@ describe('ElementCondition', () => {
             assert.throws(() => { elementCondition.trend = 'invalid'; }, /Invalid trend/);
         });
     });
+    
+    describe('.compare', () => {
+        it('should sort conditions by condition then trend', () => {
+            const input = [
+                new ElementCondition('yellow', 'red'),
+                new ElementCondition('green', 'green'),
+                new ElementCondition('yellow', 'unknown'),
+                new ElementCondition('green', 'red'),
+                new ElementCondition('red', 'yellow'),
+                new ElementCondition('unknown', 'green'),
+                new ElementCondition('unknown', 'red')
+            ];
+
+            input.sort(ElementCondition.compare);
+
+            const result = input.map(ec => `${ec.condition}:${ec.trend}`);
+
+            assert.deepStrictEqual(result, [
+                'green:green',
+                'green:red',
+                'unknown:green',
+                'unknown:red',
+                'yellow:unknown',
+                'yellow:red',
+                'red:yellow'
+            ]);
+        });
+    });
+
+
+
 });

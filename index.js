@@ -5,5 +5,6 @@ const ElementCondition = require('./lib/ElementCondition');
 const GeoSegment = require('./lib/GeoSegment');
 const Segment = require('./lib/Segment');
 const BoardRouter = require('./lib/BoardRouter');
+const Notion = require('./lib/Notion');
 
-module.exports = { Board, Asset, Element, GeoSegment, Segment, BoardRouter, ElementCondition };
+module.exports = { Board, Asset, Element, GeoSegment, Segment, BoardRouter, ElementCondition, Notion };

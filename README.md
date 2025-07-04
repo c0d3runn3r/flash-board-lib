@@ -48,6 +48,8 @@ Change detection relies on `element.summary()`, which you will need to override.
 
 > **Always summarize:** Elements render opinionated summaries!  It is an antipattern to include too-fine details.  For example, a battery voltage should not be rendered as "54.45v" because this value will change constantly, causing distracting and inefficient element updates.  Instead try "good" and "bad" voltage, or better yet a battery-style voltage bar that shows 5v increments that are colored red and green.  Even if you don't care about thrashing the server, you should care about minimizing motion on the board in order to maximize communication value.
 
+> **Use conditions properly:** Conditions are affirmative states, that is, `green` means "I definitely know that this bot is in a good state".  Use `unknown` if you actually don't know.  Remember also that conditions are variables of state; they should not be confused with a desired action.  A car on fire could be a `red` condition, even if it is not possible to put it out (or if it is currently being put out).  For additional information, you can provide a `trend` to `ElementCondition` to convey a likely upcoming state.  This can help, for example, to allow people to fix problems that are about to transpire and avoid false alerts.
+
 Making a custom Element therefore requires four things:
 1. Subclass Element, passing a custom asset class matcher to the base class constructor, e.g. `super({...obj, asset_class_matcher: /car/i })`
 2. Provide one or more opinions
