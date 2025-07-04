@@ -97,4 +97,39 @@ describe('Notion', () => {
             notion.set_value('eventTest', new Date());
         });
     });
+
+    describe('setter_mapping', () => {
+
+        it('should throw if setter_mapping is missing value or timestamp keys', () => {
+            assert.throws(() => {
+                new Notion('bad', 'x', {});
+            }, /setter_mapping must have a "value" key/);
+
+            assert.throws(() => {
+                new Notion('bad', 'x', { value: 'v' });
+            }, /setter_mapping must have a "timestamp" key/);
+
+            assert.throws(() => {
+                new Notion('bad', 'x', { value: 123, timestamp: 't' });
+            }, /setter_mapping must have a "value" key/);
+        });
+
+        it('should use mapped keys if present in value object', () => {
+            const notion = new Notion('mapped', 'x', { value: 'v', timestamp: 't' });
+            const ts = new Date('2025-01-01T00:00:00Z');
+            notion.set_value({ v: 'fromObject', t: ts }, 'ignored');
+            assert.strictEqual(notion.value, 'fromObject');
+            assert.strictEqual(notion.timestamp.getTime(), ts.getTime());
+        });
+
+        it('should fall back to raw value and timestamp if mapped keys missing', () => {
+            const notion = new Notion('fallback', 'x', { value: 'v', timestamp: 't' });
+            const ts = new Date('2025-01-02T00:00:00Z');
+            notion.set_value('fallbackValue', ts);
+            assert.strictEqual(notion.value, 'fallbackValue');
+            assert.strictEqual(notion.timestamp.getTime(), ts.getTime());
+        });
+    });
+
+
 });
