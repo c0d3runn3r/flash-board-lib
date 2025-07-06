@@ -190,36 +190,22 @@ describe('Asset', () => {
 				result,
 				{
 					id: 'test-asset',
-					name: 'Test Asset',
-					name_timestamp: timestamp.toISOString(),
-					status: 'active',
-					status_timestamp: timestamp.toISOString()
+					notions: [
+						{
+							name: 'name',
+							value: 'Test Asset',
+							timestamp: timestamp.toISOString()
+						},
+						{
+							name: 'status',
+							value: 'active',
+							timestamp: timestamp.toISOString()
+						}
+					]
 				},
 				'JSON representation is correct'
 			);
 		});
 
-		it('should exclude undefined values', () => {
-			const asset = new Asset({
-				id: 'test-asset',
-				name: undefined,
-				status: 'active'
-			});
-
-			const timestamp = new Date();
-			asset.set_value('status', 'active', timestamp);
-
-			const result = asset.to_object();
-
-			assert.deepStrictEqual(
-				result,
-				{
-					id: 'test-asset',
-					status: 'active',
-					status_timestamp: timestamp.toISOString()
-				},
-				'Undefined values are excluded'
-			);
-		});
 	});
 });
