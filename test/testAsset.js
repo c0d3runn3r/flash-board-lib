@@ -172,7 +172,7 @@ describe('Asset', () => {
 		});
 	});
 
-	describe('to_object', () => {
+	describe('toObject', () => {
 		it('should generate correct JSON representation', () => {
 			const asset = new Asset({
 				id: 'test-asset',
@@ -184,7 +184,7 @@ describe('Asset', () => {
 			asset.set_value('name', 'Test Asset', timestamp);
 			asset.set_value('status', 'active', timestamp);
 
-			const result = asset.to_object();
+			const result = asset.toObject();
 
 			assert.deepStrictEqual(
 				result,
