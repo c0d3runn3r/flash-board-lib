@@ -140,6 +140,7 @@ describe('Segment', () => {
 					{
 					"type": "Element",
 					"static": true,
+					"condition": "green",
 					"asset_type": "Asset",
 					"summary": "Element{static for=Asset asset=Asset{id=test_id1}}",
 					"asset": "Asset{id=test_id1}"
@@ -147,6 +148,7 @@ describe('Segment', () => {
 					{
 					"type": "Element",
 					"static": false,
+					"condition": "green",
 					"asset_type": "Asset",
 					"summary": "Element{for=Asset asset=Asset{id=test_id2}}",
 					"asset": "Asset{id=test_id2}"

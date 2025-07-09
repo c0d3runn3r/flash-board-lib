@@ -63,10 +63,10 @@ describe('ElementCondition', () => {
             const result = input.map(ec => `${ec.condition}:${ec.trend}`);
 
             assert.deepStrictEqual(result, [
-                'green:green',
-                'green:red',
                 'unknown:green',
                 'unknown:red',
+                'green:green',
+                'green:red',
                 'yellow:unknown',
                 'yellow:red',
                 'red:yellow'

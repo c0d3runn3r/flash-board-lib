@@ -136,6 +136,7 @@ describe('Element', () => {
 			assert.deepStrictEqual(element.render('object'), {
 				type: 'Element',
 				static: true,
+				condition: 'green',
 				asset_type: 'TestAsset',
 				summary: 'Element{static for=TestAsset asset=none}',
 				asset: ''
@@ -146,6 +147,7 @@ describe('Element', () => {
 			assert.deepStrictEqual(element.render('object'), {
 				type: 'Element',
 				static: true,
+				condition: 'green',
 				asset_type: 'TestAsset',
 				summary: 'Element{static for=TestAsset asset=TestAsset{id=test_id}}',
 				asset: 'TestAsset{id=test_id}'
