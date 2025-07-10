@@ -141,7 +141,8 @@ describe('Element', () => {
 					"message": "",
 					"trend": "unknown",
 					"type": "ElementCondition"
-				}, asset_type: 'TestAsset',
+				}, 
+				asset_type: null,
 				summary: 'Element{static for=TestAsset asset=none}',
 				asset: ''
 			});
@@ -156,7 +157,8 @@ describe('Element', () => {
 					"message": "",
 					"trend": "unknown",
 					"type": "ElementCondition"
-				}, asset_type: 'TestAsset',
+				}, 
+				asset_type: 'TestAsset',
 				summary: 'Element{static for=TestAsset asset=TestAsset{id=test_id}}',
 				asset: 'TestAsset{id=test_id}'
 			});

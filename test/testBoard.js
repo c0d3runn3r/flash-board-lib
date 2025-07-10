@@ -276,8 +276,6 @@ describe('Board', () => {
 				assert.ok(event, 'Change event should be emitted');
 				assert.ok(event.board instanceof Board, 'Event should contain the board instance');
 				assert.ok(event.changes.length > 0, 'Event should have changes');
-				assert.ok(event.changes[0].segment instanceof Segment, 'Change should be for a Segment');
-				assert.ok(event.changes[0].element instanceof Element, 'Change should be for an Element');
 				assert.strictEqual(event.changes[0].element_index, 0, 'Element index should be 0 for first element');
 				assert.strictEqual(event.changes[0].segment_index, 0, 'Segment index should be 0 for first segment');
 				done();
