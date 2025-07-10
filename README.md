@@ -56,7 +56,7 @@ Making a custom Element therefore requires four things:
 	- To enable simple summaries, override `get condition()`
 	- to enable more details, override `.render()` and produce at least one render type (probably `text` or `svg` at a minimum). **call super()** for unsupported types.  	
 3. Override `get .summary()` to return a consistent code representing render states and condition for caching
-3. Listen to any important events in your asset (you can attach/detach asset event listeners when the Element emits `pair` and `unpair` events) and call `.dirty()` if you think your render or condition might have changed.  `pair()` and `unpair()` will automatically call `dirty()` in the superclass, though this will have no effect if your `.summary` implementation doesn't use anything from the asset `:)`
+4. Listen to any important events from your asset (you can attach/detach asset event listeners in the Element by listening to your own `paired` and `unpaired` events) and call `.dirty()` if you think your render or condition might have changed.  `pair()` and `unpair()` will automatically call `dirty()` in the superclass, though this will have no effect if your `.summary` implementation doesn't use anything from the asset `:)`
 
 **Update events and client considerations**
 Segments provide a `.checksum` which can be used by clients to see if anything has gotten out of sync since their last update.  Real-time updates work as follows:
